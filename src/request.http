@@ -1,0 +1,37 @@
+
+# -*- restclient -*-
+#
+# Gets  all Github APIs, formats JSON, shows response status and headers underneath.
+# Also sends a User-Agent header, because the Github API requires this.
+# Some generic vars
+
+:my-auth = eyJraWQiOiJtXC95bkhBUlVHY2VESkFleXhBUmFYUW1ONVJCU2xDbmhmVzQwREJQXC9DczQ9IiwiYWxnIjoiUlMyNTYifQ.eyJhdF9oYXNoIjoiY0R5ZnY3X2wxSEpzdEFQTmFqdGVDZyIsInN1YiI6Ijg3YzA2MGYyLTMwN2ItNDZhYi04YTU0LWNmMmVlODYyNmIyYiIsImNvZ25pdG86Z3JvdXBzIjpbInVzLWVhc3QtMV85R1ZpUmk1VmZfc2VtYTQtYWRmcy1wcm92aWRlciJdLCJlbWFpbF92ZXJpZmllZCI6ZmFsc2UsImlzcyI6Imh0dHBzOlwvXC9jb2duaXRvLWlkcC51cy1lYXN0LTEuYW1hem9uYXdzLmNvbVwvdXMtZWFzdC0xXzlHVmlSaTVWZiIsImNvZ25pdG86dXNlcm5hbWUiOiJzZW1hNC1hZGZzLXByb3ZpZGVyX0thcmltLkF6aWlldi1leHRlcm5hIiwibm9uY2UiOiIyNEZIUjVTRldiVk5xOGZnY0hNb3FfWlZzb1EwNlQxNnEtWm9MY0tBSDlOT201bDBvNV9LUzNXY1BOcjRpMkRad0VIUFlqZmVyVWFxdGlTVVJqOXJTdXcySGdVY3I1SlZBLWFyX2pJUVNQOWVSeUhVaFNiVkQyeUI2bHNUbDFYWGVGUlNCbVdiVWw5X0NRZG5ER0ZIdW1QNTZYQWdSMWFfd2hFOHFRT2Z6UjgiLCJhdWQiOiI3NWo0Nzl0NzRqaDlkcGRxbG0zbjhvZ2VrdCIsImlkZW50aXRpZXMiOlt7InVzZXJJZCI6IkthcmltLkF6aWlldi1leHRlcm5hIiwicHJvdmlkZXJOYW1lIjoic2VtYTQtYWRmcy1wcm92aWRlciIsInByb3ZpZGVyVHlwZSI6IlNBTUwiLCJpc3N1ZXIiOiJodHRwOlwvXC9zdHMuc2VtYTRnZW5vbWljcy5jb21cL2FkZnNcL3NlcnZpY2VzXC90cnVzdCIsInByaW1hcnkiOiJ0cnVlIiwiZGF0ZUNyZWF0ZWQiOiIxNTY1MDkxMTIxMjk4In1dLCJ0b2tlbl91c2UiOiJpZCIsImF1dGhfdGltZSI6MTYyNTAzNzA5NCwiZXhwIjoxNjI1MDQwNjk0LCJpYXQiOjE2MjUwMzcwOTQsImVtYWlsIjoiS2FyaW0uQXppaWV2LWV4dGVybmFsQHNlbWE0Z2Vub21pY3MuY29tIn0.oMGc3JfXToYTBse0G9-N7iruGMTfYH1m1UWPrayLHd7ooYYkXyw6EgYWSyfseJha5cy8B8R863GBDRXkRqR-3v6MjX-bECccd2x2LqD4ZENeVV6ZMl4km0iXbx6908u67pUP8yOFrffarJ6cAG23kc97MDhisatFrT7N4H4p7-gwL3RuUWAu-cr1wN7L4_sOt4gMKwBqpstUIF2VgrRngkMk4w5Biak9UhZa4eLHOdZGsD2FvFoqNtgwQ8s36M5pF0ILorGkQCvv7VMCHSkomdy7kHbaovK4VyFY5FtDKmFM9tMGMFjTNpY_xt1D9_-zBnPUJcq501UCxMu1nfKFEQ
+:my-headers = <<
+Content-Type: application/json
+#
+
+# Update a user's name
+
+:user-id = 7
+:the-name := (format "%s %s %d" 'Neo (md5 "The Chosen") (+ 100 1))
+
+PUT http://localhost:4000/users/:user-id/
+:my-headers
+
+{ "name": ":the-name" }
+#
+#
+GET https://lpwb-api-dev.sema4genomics.com
+:my-headers
+#
+#
+#
+POST http://localhost:24885/eval
+:my-headers
+{"code": "2 + 2", "reset": "true" }
+#
+#
+POST http://localhost:24885/eval
+:my-headers
+{"code": "2 + 2", "reset": "true" }
+#

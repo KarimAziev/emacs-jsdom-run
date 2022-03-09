@@ -1,0 +1,59 @@
+{
+  "name": "emacs-jsdom-run",
+  "version": "1.0.0",
+  "description": "Run js code in jsdom window context for emacs editor.",
+  "homepage": "#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/user/new-app"
+  },
+  "bin": "bin/emacs-js-run",
+  "main": "build/main.js",
+  "scripts": {
+    "dev": "nodemon",
+    "setup": "npm update && npm install",
+    "clean": "rm -rf ./build",
+    "build": "npm run clean && tsc",
+    "start:fast": "node build/main.js",
+    "start": "npm run build && node bin/emacs-jsdom-run",
+    "upinstart": "npm run setup && npm run start",
+    "test:exit": "mocha --exit -r ts-node/register src/tests/*.test.ts",
+    "test": "env TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\" }' mocha -r ts-node/register 'src/tests/*.ts'",
+    "lint": "eslint src/"
+  },
+  "keywords": [
+    "emacs",
+    "jsdom",
+    "window",
+    "eval",
+    "vm"
+  ],
+  "author": "Karim Aziiev",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/chai": "latest",
+    "@types/express": "latest",
+    "@types/jsdom": "^16.2.14",
+    "@types/mocha": "latest",
+    "@typescript-eslint/eslint-plugin": "latest",
+    "@typescript-eslint/parser": "latest",
+    "eslint": "latest",
+    "nodemon": "latest",
+    "prettier": "^2.5.1",
+    "rimraf": "latest",
+    "ts-node": "latest",
+    "typescript": "latest"
+  },
+  "dependencies": {
+    "chai": "latest",
+    "chai-http": "latest",
+    "dotenv": "latest",
+    "ejs": "latest",
+    "express": "latest",
+    "jsdom": "^19.0.0",
+    "mocha": "latest",
+    "node-storage-shim": "^2.0.1",
+    "rollbar": "latest",
+    "simple-txt-logger": "latest"
+  }
+}
