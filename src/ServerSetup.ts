@@ -1,4 +1,3 @@
-import { SimpleTxtLogger } from 'simple-txt-logger';
 import { Logger } from './Rollbar';
 import express from 'express';
 import * as dotenv from 'dotenv';
@@ -11,21 +10,11 @@ export class ServerSetup {
   private server: http.Server;
   private app: express.Express;
   protected router: express.Router;
-  protected txtLogger: SimpleTxtLogger;
   protected logger: Logger;
-
   protected constructor(port = '24885', hostname = '127.0.0.1') {
     dotenv.config();
     this.port = process.env['PORT'] || port;
     this.hostname = process.env['HOSTNAME'] || hostname;
-
-    this.txtLogger = new SimpleTxtLogger(
-      SimpleTxtLogger.newDateTime(),
-      'Server',
-      ServerSetup.appName
-    );
-    this.logger = new Logger(this.txtLogger);
-    this.txtLogger.writeToLogFile('...::SERVER-SIDE APPLICATION STARTING::...');
 
     this.router = express.Router();
     this.app = express();
@@ -39,15 +28,21 @@ export class ServerSetup {
     this.app.use(express.urlencoded({ extended: true }));
     this.app.use(express.json());
     this.app.use('/', this.router);
-    this.txtLogger.writeToLogFile('Configured Server.');
   }
 
   private serverStart(): void {
-    this.server.listen(parseInt(this.port), this.hostname, () =>
-      this.txtLogger.writeToLogFile(
-        `Started HTTP Server: http://${this.hostname}:${this.port}`
-      )
-    );
+    this.server.listen(parseInt(this.port), this.hostname, () => {
+      process.on('SIGINT', function () {
+        /* eslint-disable-next-line no-console */
+        console.log('SIGINT trapped, killing emcas-jsdom-run');
+        process.exit();
+      });
+      process.on('SIGTERM', function () {
+        /* eslint-disable-next-line no-console */
+        console.log('SIGTERM trapped, killing emcas-jsdom-run');
+        process.exit();
+      });
+    });
   }
   public appAccessor(app = this.app): express.Express {
     return app;

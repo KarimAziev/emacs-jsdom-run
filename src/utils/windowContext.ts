@@ -4,16 +4,6 @@ import logger from './log';
 export interface WindowContextParams extends jsdom.ConstructorOptions {
   html: string;
 }
-// url,
-//   referrer,
-//   userAgent,
-//   includeNodeLocations,
-//   runScripts,
-//   resources,
-//   virtualConsole,
-//   cookieJar,
-//   pretendToBeVisual,
-//   beforeParse,
 
 const createWindowContext = function ({ html, ...rest }: WindowContextParams) {
   var html =

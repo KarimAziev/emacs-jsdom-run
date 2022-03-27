@@ -44,7 +44,9 @@ const handler = (body: EvalParams) => {
       url: contentUrl,
       ...jsdomParams,
     });
+
     vm.createContext(CONTEXT);
+    CONTEXT['exports'] = {};
     CONTEXT['require'] = (dependency: string) =>
       windowRequire(dependency, nodeModulesPath);
   }

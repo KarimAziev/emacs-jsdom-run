@@ -1,33 +1,28 @@
 {
   "name": "emacs-jsdom-run",
-  "version": "1.0.0",
+  "version": "1.0.3",
   "description": "Run js code in jsdom window context for emacs editor.",
   "homepage": "#readme",
   "repository": {
     "type": "git",
-    "url": "https://github.com/user/new-app"
+    "url": "https://github.com/KarimAziev/emacs-jsdom"
   },
-  "bin": "bin/emacs-js-run",
-  "main": "build/main.js",
+  "bin": "./bin/emacs-js-run.js",
+  "main": "./build/main.js",
+  "files": ["build", "bin"],
   "scripts": {
     "dev": "nodemon",
     "setup": "npm update && npm install",
     "clean": "rm -rf ./build",
-    "build": "npm run clean && tsc",
+    "build": "tsc",
     "start:fast": "node build/main.js",
-    "start": "npm run build && node bin/emacs-jsdom-run",
+    "start": "npm run build && tsc",
     "upinstart": "npm run setup && npm run start",
     "test:exit": "mocha --exit -r ts-node/register src/tests/*.test.ts",
     "test": "env TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\" }' mocha -r ts-node/register 'src/tests/*.ts'",
     "lint": "eslint src/"
   },
-  "keywords": [
-    "emacs",
-    "jsdom",
-    "window",
-    "eval",
-    "vm"
-  ],
+  "keywords": ["emacs", "jsdom", "window", "eval", "vm"],
   "author": "Karim Aziiev",
   "license": "MIT",
   "devDependencies": {

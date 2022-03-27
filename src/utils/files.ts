@@ -1,10 +1,9 @@
 import * as fs from 'fs';
 import * as path from 'path';
+import { builtinModules } from 'module';
 
 export const expandNodeModules = (rootDir?: string) =>
   rootDir && path.resolve(rootDir, 'node_modules');
-
-const builtins = require('repl')._builtinLibs;
 
 export const expandWhenExists = (
   moduleName: string,
@@ -19,8 +18,16 @@ export const windowRequire = (
   files: (string | undefined)[]
 ) => {
   const file =
-    builtins.includes(moduleName) || path.isAbsolute(moduleName)
+    builtinModules.includes(moduleName) || path.isAbsolute(moduleName)
       ? moduleName
       : expandWhenExists(moduleName, files);
   return file && require(file);
+};
+
+export const readFileContent = (file: fs.PathOrFileDescriptor) => {
+  try {
+    return fs.readFileSync(file, 'utf8');
+  } catch (err) {
+    return 'No code';
+  }
 };
