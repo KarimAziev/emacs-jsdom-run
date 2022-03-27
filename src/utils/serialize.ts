@@ -1,3 +1,22 @@
+const storageSimple = (() => {
+  let store = {};
+
+  return {
+    getItem(key: string) {
+      return store[key] || null;
+    },
+    setItem(key: string, value: any) {
+      store[key] = value.toString();
+    },
+    removeItem(key: string) {
+      delete store[key];
+    },
+    clear() {
+      store = {};
+    },
+  };
+})();
+
 interface SCtror {
   thing: any;
   verboseFunctions?: boolean;
@@ -32,7 +51,7 @@ class Serialize {
     this.annotateFunction = this.annotateFunction.bind(this);
     this.stringify = this.stringify.bind(this);
     this.serialize = this.serialize.bind(this);
-    this.annotateFn2 = this.annotateFn2.bind(this);
+    this.annotateFn = this.annotateFn.bind(this);
   }
 
   static makeSerialize(params: SCtror) {
@@ -45,6 +64,7 @@ class Serialize {
   verboseFunctions: any;
   circular = JSON.stringify('#<Circular>');
 
+  /* eslint-disable-next-line @typescript-eslint/ban-types */
   isFunction(v: any): v is Function {
     return v instanceof Function || typeof v === 'function';
   }
@@ -83,6 +103,8 @@ class Serialize {
   removeComments(str: string) {
     return str.replace(/\/\*[\s\S]*?\*\/|\/\/.*/g, '').trim();
   }
+
+  /* eslint-disable-next-line @typescript-eslint/ban-types */
   annotateFunction(str: Function) {
     const parts = this.removeComments(str.toString()).split('').reverse();
     const processed: string[] = [];
@@ -118,17 +140,17 @@ class Serialize {
 
     return result
       ? 'function'.concat(result as string).concat('{}')
-      : this.annotateFn2(str);
+      : this.annotateFn(str);
   }
 
-  annotateFn2(fn: Function) {
-    const name = fn.name || fn.toString() || '';
+  /* eslint-disable-next-line @typescript-eslint/ban-types */
+  annotateFn(fn: Function) {
+    const name = fn.name || '';
     const len = fn.length || 0;
     let idx = 0;
-    let list;
-    list = new Array(len);
+    const list = new Array(len);
     while (idx < len) {
-      list[idx] = `arg{idx}`;
+      list[idx] = `arg${idx}`;
       idx += 1;
     }
     return 'function ' + name + '(' + list.join(', ') + ') {}';
@@ -157,7 +179,7 @@ class Serialize {
             .split('\n')
             .map((line: string) => line.split('// ').reverse().pop())
             .join('\n')
-        : this.annotateFunction(obj);
+        : this.annotateFn(obj);
     } else if (this.isDate(obj)) {
       return this.tryStringify(obj);
     } else if (this.isArray(obj)) {
@@ -175,14 +197,14 @@ class Serialize {
 
         const pairs: string[] = [];
 
-        for (let key in obj) {
+        for (const key in obj) {
           if (
             obj &&
             obj.hasOwnProperty &&
             this.isFunction(obj.hasOwnProperty) &&
             obj.hasOwnProperty(key)
           ) {
-            let pair = key + ': ';
+            let pair = this.tryStringify(key) + ': ';
             pair += this.stringify(obj[key]);
             pairs.push(pair);
           }
@@ -203,33 +225,19 @@ class Serialize {
       this.seen.push(it);
     }
 
-    let sessionStorageMock: any = {
-      sessionStorage: () => ({
-        getItem: function (key: any) {
-          return key;
-        },
-        setItem: function (_key: any, val: any) {
-          return val;
-        },
-      }),
-      localStorage: () => ({
-        getItem: function (key: any) {
-          return key;
-        },
-        setItem: function (_key: any, val: any) {
-          return val;
-        },
-      }),
+    const storagesMock: any = {
+      sessionStorage: storageSimple,
+      localStorage: storageSimple,
     };
 
     const res = Object.keys(it).reduce((pairs: string[], key) => {
-      const value = sessionStorageMock[key]
-        ? this.stringify(sessionStorageMock[key])
+      const value = storagesMock[key]
+        ? this.stringify(storagesMock[key])
         : this.isWindow(it[key])
         ? this.circular
         : this.stringify(it[key]);
 
-      pairs.push(`${key}: ${value}`);
+      pairs.push(`${this.tryStringify(key)}: ${value}`);
 
       return pairs;
     }, []);

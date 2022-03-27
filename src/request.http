@@ -28,7 +28,7 @@ GET https://lpwb-api-dev.sema4genomics.com
 #
 POST http://localhost:24885/eval
 :my-headers
-{"code": "2 + 2", "reset": "true" }
+{"code": "2 + 2"}
 #
 #
 POST http://localhost:24885/eval

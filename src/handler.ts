@@ -1,10 +1,10 @@
 import * as vm from 'vm';
 import createWindowContext, {
   WindowContextParams,
-} from '../utils/windowContext';
-import logger from '../utils/log';
-import { expandNodeModules, windowRequire } from '../utils/files';
-import { serializeCode } from '../utils/serialize';
+} from './utils/windowContext';
+import logger from './utils/log';
+import { expandNodeModules, windowRequire } from './utils/files';
+import { serializeCode } from './utils/serialize';
 
 export let CONTEXT: { [key: string]: any };
 let contentUrl: string;
@@ -36,27 +36,37 @@ const handler = (body: EvalParams) => {
   const nodeModulesPath = [...nodeModulesPaths, expandNodeModules(rootDir)];
 
   contentUrl = url || contentUrl || DEFAULTS.url;
-
+  logger.reset();
   if (!CONTEXT || reset) {
-    logger.reset();
     CONTEXT = createWindowContext({
       html: html || DEFAULTS.html,
       url: contentUrl,
       ...jsdomParams,
     });
-
-    vm.createContext(CONTEXT);
-    CONTEXT['exports'] = {};
-    CONTEXT['require'] = (dependency: string) =>
-      windowRequire(dependency, nodeModulesPath);
   }
+  vm.createContext(CONTEXT);
+  CONTEXT['require'] = (dependency: string) =>
+    windowRequire(dependency, nodeModulesPath);
+  CONTEXT.exports = {};
+  CONTEXT.console = {};
 
-  return {
-    result: serializeCode(vm.runInContext(code, CONTEXT)),
-    logs: logger.logs,
-    url: contentUrl,
-    context: serializeCode(CONTEXT),
-  };
+  try {
+    const res = vm.runInContext(code, CONTEXT);
+    console.log('res:', res);
+    return {
+      result: serializeCode(res),
+      logs: logger.logs,
+      url: contentUrl,
+      context: serializeCode(CONTEXT),
+    };
+  } catch (error) {
+    return {
+      result: error.message,
+      logs: logger.logs,
+      url: contentUrl,
+      context: serializeCode(CONTEXT),
+    };
+  }
 };
 
 export default handler;
