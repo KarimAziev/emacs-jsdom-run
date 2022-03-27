@@ -96,7 +96,7 @@ const createWindowContext = function ({ html, ...rest }: WindowContextParams) {
     const child = require('child_process').execSync(
       'emacsclient -n --eval "(yes-or-no-p \\"' + message + '\\")"'
     );
-    return child.toString();
+    return child.toString('utf8').trimRight() === 't' ? true : false;
   };
 
   window.prompt = prompt;

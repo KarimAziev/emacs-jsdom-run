@@ -22,8 +22,9 @@ const DEFAULTS = {
   html: "<!doctype html><html><body><div id='root'></div></body></html>",
   url: 'http://localhost:3000',
 };
+// const vm = require('vm');
 
-const handler = (body: EvalParams) => {
+const handler = async (body: EvalParams) => {
   const {
     code,
     html,
@@ -33,6 +34,8 @@ const handler = (body: EvalParams) => {
     url,
     ...jsdomParams
   } = body;
+  let result;
+
   const nodeModulesPath = [...nodeModulesPaths, expandNodeModules(rootDir)];
 
   contentUrl = url || contentUrl || DEFAULTS.url;
@@ -44,29 +47,54 @@ const handler = (body: EvalParams) => {
       ...jsdomParams,
     });
   }
-  vm.createContext(CONTEXT);
-  CONTEXT['require'] = (dependency: string) =>
-    windowRequire(dependency, nodeModulesPath);
-  CONTEXT.exports = {};
-  CONTEXT.console = {};
 
-  try {
-    const res = vm.runInContext(code, CONTEXT);
-    console.log('res:', res);
-    return {
-      result: serializeCode(res),
-      logs: logger.logs,
-      url: contentUrl,
-      context: serializeCode(CONTEXT),
-    };
-  } catch (error) {
-    return {
-      result: error.message,
-      logs: logger.logs,
-      url: contentUrl,
-      context: serializeCode(CONTEXT),
-    };
-  }
+  return new Promise((resolve) => {
+    vm.createContext(CONTEXT);
+    CONTEXT['require'] = (dependency: string) =>
+      windowRequire(dependency, nodeModulesPath);
+    CONTEXT.exports = {};
+    CONTEXT.console = {};
+    try {
+      result = vm.runInContext(code, CONTEXT);
+      console.log('RESULT', result);
+    } catch (error) {
+      result = error.message;
+    }
+
+    if (result && 'function' === typeof result.then) {
+      result.then(
+        (d: any) =>
+          resolve({
+            result: serializeCode(d),
+            logs: logger.logs,
+            url: contentUrl,
+          }),
+        (d: any) =>
+          resolve({
+            result: serializeCode(d),
+            logs: logger.logs,
+            url: contentUrl,
+          })
+      );
+    } else {
+      resolve({
+        result: serializeCode(result),
+        logs: logger.logs,
+        url: contentUrl,
+      });
+    }
+  });
+
+  // const sandbox = {
+  //     a: 1
+  //   };
+  //   await new Promise(resolve => {
+  //     sandbox.resolve = resolve;
+  //     const code = 'Promise.resolve(2).then(result => {a = result; resolve();})';
+  //     const script = new vm.Script(code);
+  //     const context = new vm.createContext(sandbox);
+  //     script.runInContext(context);
+  //   });
 };
 
 export default handler;

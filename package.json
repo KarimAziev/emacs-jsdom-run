@@ -1,25 +1,26 @@
 {
   "name": "emacs-jsdom-run",
-  "version": "1.0.3",
-  "description": "Run js code in jsdom window context for emacs editor.",
+  "version": "1.0.7",
+  "description": "The server to run JS code in jsdom context from emacs editor.",
   "homepage": "#readme",
   "repository": {
     "type": "git",
     "url": "https://github.com/KarimAziev/emacs-jsdom"
   },
-  "bin": "./bin/emacs-js-run.js",
-  "main": "./build/main.js",
-  "files": ["build", "bin"],
+  "bin": {
+    "emacs-jsdom-run": "./bin/emacs-jsdom-run"
+  },
+  "main": "lib/main.js",
+  "files": ["lib", "bin"],
   "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "nodemon",
     "setup": "npm update && npm install",
-    "clean": "rm -rf ./build",
+    "clean": "rimraf -rf lib",
     "build": "tsc",
-    "start:fast": "node build/main.js",
-    "start": "tsc && node build/main.js",
+    "start:fast": "node lib/main.js",
+    "start": "tsc && node lib/main.js",
     "upinstart": "npm run setup && npm run start",
-    "test:exit": "mocha --exit -r ts-node/register src/tests/*.test.ts",
-    "test": "env TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\" }' mocha -r ts-node/register 'src/tests/*.ts'",
     "lint": "eslint src/"
   },
   "keywords": ["emacs", "jsdom", "window", "eval", "vm"],
@@ -34,21 +35,13 @@
     "@typescript-eslint/parser": "latest",
     "eslint": "latest",
     "nodemon": "latest",
+    "npm-run-all": "^4.1.5",
     "prettier": "^2.5.1",
-    "rimraf": "latest",
+    "rimraf": "^3.0.2",
     "ts-node": "latest",
     "typescript": "latest"
   },
   "dependencies": {
-    "chai": "latest",
-    "chai-http": "latest",
-    "dotenv": "latest",
-    "ejs": "latest",
-    "express": "latest",
-    "jsdom": "^19.0.0",
-    "mocha": "latest",
-    "node-storage-shim": "^2.0.1",
-    "rollbar": "latest",
-    "simple-txt-logger": "latest"
+    "jsdom": "^19.0.0"
   }
 }

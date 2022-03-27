@@ -2,4 +2,4 @@
 
 process.env.NODE_NO_WARNINGS = '1';
 
-require('../build/main.js');
+require('../lib/main.js');
