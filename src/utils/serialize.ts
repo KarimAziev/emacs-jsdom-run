@@ -145,7 +145,7 @@ class Serialize {
 
   /* eslint-disable-next-line @typescript-eslint/ban-types */
   annotateFn(fn: Function) {
-    const name = fn.name || '';
+    const name = (fn.name && fn.name.split(/[^a-z]/gi).join('')) || '';
     const len = fn.length || 0;
     let idx = 0;
     const list = new Array(len);

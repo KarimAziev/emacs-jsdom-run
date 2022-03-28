@@ -22,7 +22,6 @@ const DEFAULTS = {
   html: "<!doctype html><html><body><div id='root'></div></body></html>",
   url: 'http://localhost:3000',
 };
-// const vm = require('vm');
 
 const handler = async (body: EvalParams) => {
   const {
@@ -37,7 +36,7 @@ const handler = async (body: EvalParams) => {
   let result;
 
   const nodeModulesPath = [...nodeModulesPaths, expandNodeModules(rootDir)];
-
+  const script = new vm.Script(code);
   contentUrl = url || contentUrl || DEFAULTS.url;
   logger.reset();
   if (!CONTEXT || reset) {
@@ -46,16 +45,15 @@ const handler = async (body: EvalParams) => {
       url: contentUrl,
       ...jsdomParams,
     });
-  }
-
-  return new Promise((resolve) => {
-    vm.createContext(CONTEXT);
     CONTEXT['require'] = (dependency: string) =>
       windowRequire(dependency, nodeModulesPath);
+
     CONTEXT.exports = {};
-    CONTEXT.console = {};
+  }
+  return new Promise((resolve) => {
+    vm.createContext(CONTEXT);
     try {
-      result = vm.runInContext(code, CONTEXT);
+      result = script.runInContext(CONTEXT);
       console.log('RESULT', result);
     } catch (error) {
       result = error.message;
@@ -84,17 +82,6 @@ const handler = async (body: EvalParams) => {
       });
     }
   });
-
-  // const sandbox = {
-  //     a: 1
-  //   };
-  //   await new Promise(resolve => {
-  //     sandbox.resolve = resolve;
-  //     const code = 'Promise.resolve(2).then(result => {a = result; resolve();})';
-  //     const script = new vm.Script(code);
-  //     const context = new vm.createContext(sandbox);
-  //     script.runInContext(context);
-  //   });
 };
 
 export default handler;

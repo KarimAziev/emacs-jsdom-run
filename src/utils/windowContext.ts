@@ -10,7 +10,6 @@ const createWindowContext = function ({ html, ...rest }: WindowContextParams) {
   var html =
     html || "<!doctype html><html><body><div id='root'></div></body></html>";
   /* eslint-disable-next-line no-var */
-  var global: Record<string, any> = {};
   /* eslint-disable-next-line no-var */
   var dom = new jsdom.JSDOM(html, rest);
 
@@ -56,11 +55,8 @@ const createWindowContext = function ({ html, ...rest }: WindowContextParams) {
       };
     })();
 
-  global['window'] = window;
   global['document'] = window.document;
-  global['navigator'] = {
-    userAgent: 'node.js',
-  };
+
   /* eslint-disable-next-line @typescript-eslint/ban-types */
   global['requestAnimationFrame'] = function (callback: Function) {
     return setTimeout(callback, 0);
