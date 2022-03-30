@@ -1,5 +1,4 @@
 import * as jsdom from 'jsdom';
-import logger from './log';
 
 export interface WindowContextParams extends jsdom.ConstructorOptions {
   html: string;
@@ -55,14 +54,14 @@ const createWindowContext = function ({ html, ...rest }: WindowContextParams) {
       };
     })();
 
-  global['document'] = window.document;
+  // window['document'] = window.document;
 
   /* eslint-disable-next-line @typescript-eslint/ban-types */
-  global['requestAnimationFrame'] = function (callback: Function) {
+  window['requestAnimationFrame'] = function (callback: Function) {
     return setTimeout(callback, 0);
   };
 
-  global['cancelAnimationFrame'] = function (id?: number) {
+  window['cancelAnimationFrame'] = function (id?: number) {
     clearTimeout(id);
   };
 
@@ -98,16 +97,6 @@ const createWindowContext = function ({ html, ...rest }: WindowContextParams) {
   window.prompt = prompt;
   window.alert = alert;
   window.confirm = confirm;
-
-  window['console'] = {
-    ...window['console'],
-    fatal: logger.fatal,
-    error: logger.error,
-    warn: logger.warn,
-    info: logger.info,
-    debug: logger.debug,
-    log: logger.log,
-  };
 
   return Object.defineProperties(global, {
     ...Object.getOwnPropertyDescriptors(window),

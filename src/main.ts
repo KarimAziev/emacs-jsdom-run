@@ -21,9 +21,7 @@ const server = http.createServer(async (req, res) => {
   let result;
   try {
     result = await evalHandler(body);
-    console.log(result);
   } catch (error) {
-    console.log('ERROR', error);
     result = error;
   }
   res.writeHead(200, { 'Content-Type': 'application/json' });

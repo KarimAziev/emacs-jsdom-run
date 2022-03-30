@@ -1,6 +1,14 @@
 {
   "restartable": "rstrt",
-  "ignore": [".git", ".github", "node_modules", "dist", "build", "coverage"],
+  "ignore": [
+    ".git",
+    ".github",
+    "node_modules",
+    "dist",
+    "build",
+    "lib",
+    "coverage"
+  ],
   "watch": ["src"],
   "exec": "ts-node ./bin/emacs-jsdom-run",
   "ext": ".js,.json,.ts"

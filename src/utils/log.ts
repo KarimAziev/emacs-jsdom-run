@@ -22,7 +22,7 @@ export interface LogItem {
   text: string;
 }
 
-class Logger {
+export class Logger {
   public fatal!: Console['error'];
   public error!: Console['error'];
   public log!: Console['log'];

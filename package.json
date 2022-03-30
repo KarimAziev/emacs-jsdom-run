@@ -10,8 +10,11 @@
   "bin": {
     "emacs-jsdom-run": "./bin/emacs-jsdom-run"
   },
-  "main": "lib/main.js",
-  "files": ["lib", "bin"],
+  "main": "./lib/main.js",
+  "files": [
+    "lib",
+    "bin"
+  ],
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "nodemon",
@@ -23,7 +26,13 @@
     "upinstart": "npm run setup && npm run start",
     "lint": "eslint src/"
   },
-  "keywords": ["emacs", "jsdom", "window", "eval", "vm"],
+  "keywords": [
+    "emacs",
+    "jsdom",
+    "window",
+    "eval",
+    "vm"
+  ],
   "author": "Karim Aziiev",
   "license": "MIT",
   "devDependencies": {

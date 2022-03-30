@@ -1,21 +1,27 @@
 import * as vm from 'vm';
+import * as path from 'path';
 import createWindowContext, {
   WindowContextParams,
 } from './utils/windowContext';
-import logger from './utils/log';
-import { expandNodeModules, windowRequire } from './utils/files';
+import logger, { Logger } from './utils/log';
+import { expandNodeModules, createRequire } from './utils/files';
 import { serializeCode } from './utils/serialize';
 
 export let CONTEXT: { [key: string]: any };
 let contentUrl: string;
 
+export function isString(v: any): v is string {
+  return v;
+}
+
 export interface EvalParams extends WindowContextParams {
   code: string;
   url: string;
   reset: boolean;
-  file: string;
-  rootDir: string;
-  nodeModulesPaths?: string[];
+  file?: string;
+  rootDir?: string;
+  dirname?: string;
+  nodeModulesPaths?: string | string[];
 }
 
 const DEFAULTS = {
@@ -28,57 +34,77 @@ const handler = async (body: EvalParams) => {
     code,
     html,
     nodeModulesPaths = [],
+    dirname,
     rootDir,
     reset,
     url,
+    file,
     ...jsdomParams
   } = body;
-  let result;
+  console.log('REQUEST:\n', body);
+  return new Promise(function (resolve) {
+    let result;
+    logger.reset();
 
-  const nodeModulesPath = [...nodeModulesPaths, expandNodeModules(rootDir)];
-  const script = new vm.Script(code);
-  contentUrl = url || contentUrl || DEFAULTS.url;
-  logger.reset();
-  if (!CONTEXT || reset) {
-    CONTEXT = createWindowContext({
-      html: html || DEFAULTS.html,
-      url: contentUrl,
-      ...jsdomParams,
-    });
-    CONTEXT['require'] = (dependency: string) =>
-      windowRequire(dependency, nodeModulesPath);
+    const dir = dirname || (file && path.dirname(file));
+    const nodeModulesPath = Array.isArray(nodeModulesPaths)
+      ? [...nodeModulesPaths, expandNodeModules(rootDir)].filter(isString)
+      : [nodeModulesPaths, expandNodeModules(rootDir)].filter(isString);
 
-    CONTEXT.exports = {};
-  }
-  return new Promise((resolve) => {
-    vm.createContext(CONTEXT);
-    try {
-      result = script.runInContext(CONTEXT);
-      console.log('RESULT', result);
-    } catch (error) {
-      result = error.message;
+    const script = new vm.Script(code);
+    const htmlScript = new vm.Script('document.documentElement.outerHTML');
+    contentUrl = url || contentUrl || DEFAULTS.url;
+
+    if (!CONTEXT || reset) {
+      CONTEXT = createWindowContext({
+        html: html || DEFAULTS.html,
+        url: contentUrl,
+        ...jsdomParams,
+      });
+      CONTEXT.exports = {};
     }
 
-    if (result && 'function' === typeof result.then) {
-      result.then(
-        (d: any) =>
-          resolve({
-            result: serializeCode(d),
-            logs: logger.logs,
-            url: contentUrl,
-          }),
-        (d: any) =>
-          resolve({
-            result: serializeCode(d),
-            logs: logger.logs,
-            url: contentUrl,
-          })
-      );
-    } else {
+    CONTEXT['require'] = createRequire(nodeModulesPath, dir);
+    Logger.levels.forEach(function (level) {
+      CONTEXT.console[level] = logger[level];
+    });
+    vm.createContext(CONTEXT);
+
+    try {
+      result = reset
+        ? script.runInNewContext(CONTEXT)
+        : script.runInContext(CONTEXT);
+      if (result && 'function' === typeof result.then) {
+        result.then(
+          (d: any) =>
+            resolve({
+              result: serializeCode(d),
+              logs: logger.logs,
+              url: contentUrl,
+              html: htmlScript.runInContext(CONTEXT),
+            }),
+          (d: any) =>
+            resolve({
+              result: serializeCode(d),
+              logs: logger.logs,
+              url: contentUrl,
+              html: htmlScript.runInContext(CONTEXT),
+            })
+        );
+      } else {
+        resolve({
+          result: serializeCode(result),
+          logs: logger.logs,
+          url: contentUrl,
+          html: htmlScript.runInContext(CONTEXT),
+        });
+      }
+    } catch (error) {
       resolve({
-        result: serializeCode(result),
+        result: error.message,
         logs: logger.logs,
         url: contentUrl,
+        html: htmlScript.runInContext(CONTEXT),
       });
     }
   });
