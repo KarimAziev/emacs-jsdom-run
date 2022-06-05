@@ -18,7 +18,7 @@
     "dev": "nodemon",
     "setup": "npm update && npm install",
     "clean": "rimraf -rf lib",
-    "build": "tsc",
+    "build": "node ./node_modules/.bin/tsc",
     "prebuild": "npm-run-all -s clean",
     "prepublishOnly": "npm-run-all -s tsc",
     "start:fast": "node lib/main.js",
