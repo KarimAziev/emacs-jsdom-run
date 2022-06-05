@@ -1,6 +1,6 @@
 {
   "name": "emacs-jsdom-run",
-  "version": "1.0.9",
+  "version": "1.0.10",
   "description": "The server to run JS code in jsdom context from emacs editor.",
   "homepage": "#readme",
   "repository": {
