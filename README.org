@@ -1,0 +1,4 @@
+* emacs-jsdom-run
+
+Run js code in jsdom context with emacs handlers for alert, confirm, and prompt.
+See emacs package [[https://github.com/KarimAziev/js-eval][js-eval]].

@@ -1,3 +1,6 @@
+const OFF = 0;
+const WARN = 1;
+const ERROR = 2;
 module.exports = {
   parser: '@typescript-eslint/parser',
   plugins: ['@typescript-eslint'],
@@ -8,4 +11,12 @@ module.exports = {
     'no-console': 'off',
     '@typescript-eslint/no-explicit-any': 'off',
   },
+  overrides: [
+    {
+      files: ['bin/*.js'],
+      rules: {
+        '@typescript-eslint/no-var-requires': OFF,
+      },
+    },
+  ],
 };

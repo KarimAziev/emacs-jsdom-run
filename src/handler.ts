@@ -1,110 +1,101 @@
 import * as vm from 'vm';
+import * as util from 'util';
 import * as path from 'path';
-import createWindowContext, {
-  WindowContextParams,
-} from './utils/windowContext';
-import logger, { Logger } from './utils/log';
-import { expandNodeModules, createRequire } from './utils/files';
-import { serializeCode } from './utils/serialize';
+import * as jsdom from 'jsdom';
+import { Types } from 'jsdom-context-require';
+import logger, { log, formatHtml, formatCurrTime } from './logger';
+import { serializeCode } from './serialize';
+import { createDOMContext } from './createContext';
+import { runCode } from './runCode';
+import { formatCode } from './formatCode';
 
-export let CONTEXT: { [key: string]: any };
-let contentUrl: string;
+export let CONTEXT: Types.JSDOMModule & jsdom.DOMWindow;
+export let lastHtml: string;
+export let prevDir: string;
 
-export function isString(v: any): v is string {
-  return v;
-}
-
-export interface EvalParams extends WindowContextParams {
+export interface RequestBodyParams extends jsdom.ConstructorOptions {
   code: string;
-  url: string;
   reset: boolean;
+  html?: string;
+  url?: string;
   file?: string;
-  rootDir?: string;
-  dirname?: string;
-  nodeModulesPaths?: string | string[];
+  dir?: string;
 }
 
+export function isElement(element: any): element is Element {
+  if (CONTEXT && CONTEXT.window) {
+    return element instanceof CONTEXT.window.Element;
+  } else {
+    return false;
+  }
+}
 const DEFAULTS = {
-  html: "<!doctype html><html><body><div id='root'></div></body></html>",
+  html: "<!doctype html><html><body><div id='root'>Hello world</div></body></html>",
   url: 'http://localhost:3000',
 };
-
-const handler = async (body: EvalParams) => {
-  const {
-    code,
-    html,
-    nodeModulesPaths = [],
-    dirname,
-    rootDir,
-    reset,
-    url,
-    file,
-    ...jsdomParams
-  } = body;
-  console.log('REQUEST:\n', body);
-  return new Promise(function (resolve) {
-    let result;
-    logger.reset();
-
-    const dir = dirname || (file && path.dirname(file));
-    const nodeModulesPath = Array.isArray(nodeModulesPaths)
-      ? [...nodeModulesPaths, expandNodeModules(rootDir)].filter(isString)
-      : [nodeModulesPaths, expandNodeModules(rootDir)].filter(isString);
-
-    const script = new vm.Script(code);
-    const htmlScript = new vm.Script('document.documentElement.outerHTML');
-    contentUrl = url || contentUrl || DEFAULTS.url;
-
-    if (!CONTEXT || reset) {
-      CONTEXT = createWindowContext({
-        html: html || DEFAULTS.html,
-        url: contentUrl,
-        ...jsdomParams,
-      });
-      CONTEXT.exports = {};
-    }
-
-    CONTEXT['require'] = createRequire(nodeModulesPath, dir);
-    Logger.levels.forEach(function (level) {
-      CONTEXT.console[level] = logger[level];
+export const setupVMContext = ({
+  reset,
+  dir,
+  file,
+  ...jsdomParams
+}: Omit<RequestBodyParams, 'code'>) => {
+  const dirname = dir || (file && path.dirname(file)) || process.cwd();
+  if (reset || prevDir !== dirname || !CONTEXT) {
+    CONTEXT = createDOMContext({
+      dir: dirname,
+      ...DEFAULTS,
+      ...jsdomParams,
     });
-    vm.createContext(CONTEXT);
+  }
+  CONTEXT.exports = {};
+  lastHtml = CONTEXT.document.documentElement.outerHTML;
+  prevDir = dirname;
+  vm.createContext(CONTEXT);
+};
 
+const handler = async (body: RequestBodyParams) => {
+  const { code, ...jsdomParams } = body;
+  setupVMContext(jsdomParams);
+  if (!code) {
+    return;
+  }
+  return new Promise(function (resolve) {
     try {
-      result = reset
-        ? script.runInNewContext(CONTEXT)
-        : script.runInContext(CONTEXT);
-      if (result && 'function' === typeof result.then) {
-        result.then(
-          (d: any) =>
-            resolve({
-              result: serializeCode(d),
-              logs: logger.logs,
-              url: contentUrl,
-              html: htmlScript.runInContext(CONTEXT),
-            }),
-          (d: any) =>
-            resolve({
-              result: serializeCode(d),
-              logs: logger.logs,
-              url: contentUrl,
-              html: htmlScript.runInContext(CONTEXT),
-            })
-        );
-      } else {
-        resolve({
-          result: serializeCode(result),
-          logs: logger.logs,
-          url: contentUrl,
-          html: htmlScript.runInContext(CONTEXT),
-        });
-      }
+      runCode(code, CONTEXT).then(
+        (res) => {
+          const serialized = isElement(res)
+            ? util.format(res)
+            : formatCode(serializeCode(res));
+
+          console.log(
+            `** Result ${formatCurrTime()}\n#+BEGIN_SRC javascript\n${util.format(
+              res
+            )}\n#+END_SRC`
+          );
+          const html = vm.runInContext(
+            'document.documentElement.outerHTML',
+            CONTEXT
+          );
+          if (lastHtml !== html) {
+            log(formatHtml(html));
+          }
+
+          resolve({
+            result: serialized,
+            html: html,
+          });
+        },
+        (error) => {
+          logger.error(error.message);
+          resolve({
+            result: error.message,
+          });
+        }
+      );
     } catch (error) {
+      logger.error(error.message);
       resolve({
         result: error.message,
-        logs: logger.logs,
-        url: contentUrl,
-        html: htmlScript.runInContext(CONTEXT),
       });
     }
   });

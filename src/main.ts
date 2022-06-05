@@ -1,8 +1,9 @@
 import http from 'http';
 import evalHandler from './handler';
+import { formatCurrTime } from './logger';
 
-const HOSTNAME = '127.0.0.1';
-const PORT = 24885;
+const HOSTNAME = process.env.HOSTNAME || '127.0.0.1';
+const PORT = process.env.PORT ? Number(process.env.PORT) : 24885;
 
 const getReqBody = async (req: http.IncomingMessage) => {
   const buffers = [];
@@ -16,8 +17,9 @@ const getReqBody = async (req: http.IncomingMessage) => {
   return data;
 };
 
-const server = http.createServer(async (req, res) => {
+const httpServer = http.createServer(async (req, res) => {
   const body = await getReqBody(req);
+
   let result;
   try {
     result = await evalHandler(body);
@@ -28,8 +30,18 @@ const server = http.createServer(async (req, res) => {
   res.end(JSON.stringify(result));
 });
 
-server.listen(PORT, HOSTNAME, () => {
-  console.log(`Server running at http://${HOSTNAME}:${PORT}`);
+httpServer.listen(PORT, HOSTNAME, undefined, () => {
+  process.on('SIGINT', function () {
+    console.log('SIGINT trapped, killing emacs-jsdom');
+    process.exit();
+  });
+  process.on('SIGTERM', function () {
+    console.log('SIGTERM trapped, killing emacs-jsdom');
+    process.exit();
+  });
+  console.log(
+    `* Session started at http://${HOSTNAME}:${PORT} ${formatCurrTime()}`
+  );
 });
 
-export default server;
+export default httpServer;

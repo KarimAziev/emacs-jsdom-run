@@ -8,13 +8,11 @@
     "url": "https://github.com/KarimAziev/emacs-jsdom"
   },
   "bin": {
-    "emacs-jsdom-run": "./bin/emacs-jsdom-run"
+    "emacs-jsdom-run": "./bin/emacs-jsdom-run",
+    "emacs-jsdom-repl": "./bin/repl.js"
   },
   "main": "./lib/main.js",
-  "files": [
-    "lib",
-    "bin"
-  ],
+  "files": ["lib", "bin"],
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "nodemon",
@@ -26,13 +24,7 @@
     "upinstart": "npm run setup && npm run start",
     "lint": "eslint src/"
   },
-  "keywords": [
-    "emacs",
-    "jsdom",
-    "window",
-    "eval",
-    "vm"
-  ],
+  "keywords": ["emacs", "jsdom", "window", "eval", "vm"],
   "author": "Karim Aziiev",
   "license": "MIT",
   "devDependencies": {
@@ -45,12 +37,14 @@
     "eslint": "latest",
     "nodemon": "latest",
     "npm-run-all": "^4.1.5",
-    "prettier": "^2.5.1",
     "rimraf": "^3.0.2",
     "ts-node": "latest",
     "typescript": "latest"
   },
   "dependencies": {
-    "jsdom": "^19.0.0"
+    "chalk": "^5.0.1",
+    "jsdom": "^19.0.0",
+    "jsdom-context-require": "^4.0.4",
+    "prettier": "^2.6.1"
   }
 }

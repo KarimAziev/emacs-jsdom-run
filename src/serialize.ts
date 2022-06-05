@@ -1,3 +1,14 @@
+export const getMethods = (obj: object) => {
+  const properties = new Set();
+  let currentObj = obj;
+  do {
+    Object.getOwnPropertyNames(currentObj).map((item) => properties.add(item));
+  } while ((currentObj = Object.getPrototypeOf(currentObj)));
+  return [...properties.keys()].filter(
+    (item) => typeof obj[item as string] === 'function'
+  );
+};
+
 const storageSimple = (() => {
   let store = {};
 
@@ -48,7 +59,6 @@ class Serialize {
     this.isWindowNode = this.isWindowNode.bind(this);
     this.isDate = this.isDate.bind(this);
     this.tryStringify = this.tryStringify.bind(this);
-    this.annotateFunction = this.annotateFunction.bind(this);
     this.stringify = this.stringify.bind(this);
     this.serialize = this.serialize.bind(this);
     this.annotateFn = this.annotateFn.bind(this);
@@ -259,9 +269,12 @@ export const serializeCode = (
   thing: any,
   verboseFunctions?: boolean,
   maxStringLength?: number
-) =>
-  Serialize.makeSerialize({
+) => {
+  const serialized = Serialize.makeSerialize({
     thing,
     verboseFunctions,
     maxStringLength,
   }).serialize();
+
+  return serialized;
+};
