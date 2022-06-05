@@ -5,7 +5,6 @@ export const prompt: jsdom.DOMWindow['prompt'] = function (message, _default) {
 
   try {
     return JSON.parse(
-      /* eslint-disable-next-line @typescript-eslint/no-var-requires */
       require('child_process')
         .execSync('emacsclient --eval ' + str)
         .toString('utf8')
@@ -16,7 +15,6 @@ export const prompt: jsdom.DOMWindow['prompt'] = function (message, _default) {
 };
 
 export const alert: jsdom.DOMWindow['alert'] = function (message) {
-  /* eslint-disable-next-line @typescript-eslint/no-var-requires */
   require('child_process').execSync(
     'emacsclient -n --eval "(x-popup-dialog t \'(\\"\n' +
       new Array(80).fill('').join(' ') +
@@ -28,19 +26,16 @@ export const alert: jsdom.DOMWindow['alert'] = function (message) {
 
 export const confirm: jsdom.DOMWindow['confirm'] = function (message) {
   try {
-    return (
-      /* eslint-disable-next-line @typescript-eslint/no-var-requires */
-      require('child_process')
-        .execSync(
-          'emacsclient -n --eval "(x-popup-dialog t \'(\\"' +
-            message +
-            '\\" (\\"Yes\\" t) (\\"Cancel\\" nil)))"'
-        )
-        .toString('utf8')
-        .trimRight()
-        .split('')
-        .includes('t')
-    );
+    return require('child_process')
+      .execSync(
+        'emacsclient -n --eval "(x-popup-dialog t \'(\\"' +
+          message +
+          '\\" (\\"Yes\\" t) (\\"Cancel\\" nil)))"'
+      )
+      .toString('utf8')
+      .trimRight()
+      .split('')
+      .includes('t');
   } catch (_error) {
     return false;
   }
