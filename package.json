@@ -12,10 +12,7 @@
     "emacs-jsdom-repl": "./bin/repl.js"
   },
   "main": "./lib/main.js",
-  "files": [
-    "lib",
-    "bin"
-  ],
+  "files": ["lib", "bin"],
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "nodemon",
@@ -23,19 +20,13 @@
     "clean": "rimraf -rf lib",
     "build": "node ./node_modules/.bin/tsc",
     "prebuild": "npm-run-all -s clean",
-    "prepublishOnly": "npm-run-all -s tsc",
+    "prepublishOnly": "npm-run-all -s build",
     "start:fast": "node lib/main.js",
     "start": "tsc && node lib/main.js",
     "upinstart": "npm run setup && npm run start",
     "lint": "eslint src/"
   },
-  "keywords": [
-    "emacs",
-    "jsdom",
-    "window",
-    "eval",
-    "vm"
-  ],
+  "keywords": ["emacs", "jsdom", "window", "eval", "vm"],
   "author": "Karim Aziiev",
   "license": "MIT",
   "devDependencies": {
