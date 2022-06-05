@@ -1,6 +1,6 @@
 {
   "name": "emacs-jsdom-run",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "description": "The server to run JS code in jsdom context from emacs editor.",
   "homepage": "#readme",
   "repository": {
@@ -12,7 +12,10 @@
     "emacs-jsdom-repl": "./bin/repl.js"
   },
   "main": "./lib/main.js",
-  "files": ["lib", "bin"],
+  "files": [
+    "lib",
+    "bin"
+  ],
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "nodemon",
@@ -24,7 +27,13 @@
     "upinstart": "npm run setup && npm run start",
     "lint": "eslint src/"
   },
-  "keywords": ["emacs", "jsdom", "window", "eval", "vm"],
+  "keywords": [
+    "emacs",
+    "jsdom",
+    "window",
+    "eval",
+    "vm"
+  ],
   "author": "Karim Aziiev",
   "license": "MIT",
   "devDependencies": {
